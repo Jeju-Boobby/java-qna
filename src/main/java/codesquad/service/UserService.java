@@ -41,12 +41,15 @@ public class UserService {
     }
 
     public User login(String userId, String password) throws UnAuthenticationException {
-        // TODO 로그인 기능 구현
         Optional<User> optionalUser = userRepository.findByUserId(userId);
         if (!optionalUser.isPresent() || !optionalUser.get().matchPassword(password)) {
             throw new UnAuthenticationException();
         }
 
         return optionalUser.get();
+    }
+
+    public User findOne(long userId) {
+        return userRepository.findOne(userId);
     }
 }
