@@ -1,7 +1,6 @@
 package codesquad.web;
 
 import codesquad.domain.Question;
-import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
 import codesquad.service.QnaService;
 import codesquad.service.UserService;
@@ -18,6 +17,7 @@ import support.test.HtmlFormDataBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 
 public class QnaAcceptanceTest extends AcceptanceTest {
@@ -71,14 +71,23 @@ public class QnaAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void read_one() {
+    public void show_one() {
         long id = 1;
         Question question = qnaService.findById(id);
 
         ResponseEntity<String> response = template().getForEntity(String.format("/questions/%d", id), String.class);
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
-        assertThat(response.getBody().contains(question.getTitle()), is(true));
+        assertTrue(response.getBody().contains(question.getTitle()));
+    }
+
+    @Test
+    public void show_list() {
+        Question question = qnaService.findById(1);
+        ResponseEntity<String> response = template().getForEntity("/", String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertTrue(response.getBody().contains(question.getTitle()));
     }
 
     @Test
@@ -113,5 +122,68 @@ public class QnaAcceptanceTest extends AcceptanceTest {
                 .getForEntity(String.format("/questions/%d/form", questionId), String.class);
 
         assertThat(reponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void update_owner_login() {
+        User loginUser = defaultUser();
+        long questionId = 1;
+
+        String title = "test title";
+        String contents = "test contents";
+
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .addParameter("_method", "put")
+                .addParameter("title", title)
+                .addParameter("contents", contents)
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate(loginUser)
+                .postForEntity(String.format("/questions/%d", questionId), request, String.class);
+        Question updatedQuestion = qnaService.findById(questionId);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertThat(updatedQuestion.getTitle(), is(title));
+        assertThat(updatedQuestion.getContents(), is(contents));
+        assertTrue(response.getHeaders().getLocation().getPath().startsWith("/questions"));
+    }
+
+    @Test
+    public void update_no_login() {
+        long questionId = 1;
+
+        String title = "test title";
+        String contents = "test contents";
+
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .addParameter("_method", "put")
+                .addParameter("title", title)
+                .addParameter("contents", contents)
+                .build();
+
+        ResponseEntity<String> response = template()
+                .postForEntity(String.format("/questions/%d", questionId), request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void update_not_owner_login() {
+        User notOwnerUser = userService.findOne(2);
+        long questionId = 1;
+
+        String title = "test title";
+        String contents = "test contents";
+
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .addParameter("_method", "put")
+                .addParameter("title", title)
+                .addParameter("contents", contents)
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate(notOwnerUser)
+                .postForEntity(String.format("/questions/%d", questionId), request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 }

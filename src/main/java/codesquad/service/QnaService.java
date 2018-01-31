@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import codesquad.UnAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -41,8 +42,13 @@ public class QnaService {
     }
 
     public Question update(User loginUser, long id, Question updatedQuestion) {
-        // TODO 수정 기능 구현
-        return null;
+        Question question = questionRepository.findOne(id);
+        if (!question.isOwner(loginUser)) {
+            throw new UnAuthorizedException("자신의 글만 수정할 수 있습니다.");
+        }
+        question.update(updatedQuestion.getTitle(), updatedQuestion.getContents());
+
+        return questionRepository.save(question);
     }
 
     @Transactional
