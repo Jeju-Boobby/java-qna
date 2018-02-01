@@ -1,5 +1,7 @@
 package support.test;
 
+import codesquad.domain.Question;
+import codesquad.domain.QuestionRepository;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,9 @@ public abstract class AcceptanceTest {
 
     @Autowired
     private TestRestTemplate template;
+
+    @Autowired
+    private QuestionRepository questionRepository;
     
     @Autowired
     private UserRepository userRepository;
@@ -39,5 +44,9 @@ public abstract class AcceptanceTest {
     
     protected User findByUserId(String userId) {
         return userRepository.findByUserId(userId).get();
+    }
+
+    protected Question findQuestionById(long id) {
+        return questionRepository.findOne(id);
     }
 }
