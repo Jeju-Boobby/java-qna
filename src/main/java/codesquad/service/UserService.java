@@ -44,11 +44,9 @@ public class UserService {
 
     public User login(String userId, String password) throws UnAuthenticationException {
         Optional<User> optionalUser = userRepository.findByUserId(userId);
-        if (!optionalUser.isPresent() || !optionalUser.get().matchPassword(password)) {
-            throw new UnAuthenticationException();
-        }
 
-        return optionalUser.get();
+        return optionalUser.filter(user -> user.matchPassword(password))
+                .orElseThrow(UnAuthorizedException::new);
     }
 
     public User findOne(long userId) {
