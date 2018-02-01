@@ -37,26 +37,35 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void show_모든사람() {
+    public void show_게스트() {
         QuestionDto newQuestionDto = createQuestionDto(3);
         String location = createResource(newQuestionDto);
 
-        //로그인 안했을 때
         QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
         assertEquals(newQuestionDto, insertedQuestionDto);
+    }
 
-        //작성자 로그인 했을 때
-        insertedQuestionDto = getResource(location, basicAuthTemplate(defaultUser()), QuestionDto.class);
+    @Test
+    public void show_작성자() {
+        QuestionDto newQuestionDto = createQuestionDto(4);
+        String location = createResource(newQuestionDto);
+
+        QuestionDto insertedQuestionDto = getResource(location, basicAuthTemplate(defaultUser()), QuestionDto.class);
         assertEquals(newQuestionDto, insertedQuestionDto);
+    }
 
-        //다른사람 로그인 했을 때
-        insertedQuestionDto = getResource(location, basicAuthTemplate(otherUser), QuestionDto.class);
+    @Test
+    public void show_다른사람() {
+        QuestionDto newQuestionDto = createQuestionDto(5);
+        String location = createResource(newQuestionDto);
+
+        QuestionDto insertedQuestionDto = getResource(location, basicAuthTemplate(otherUser), QuestionDto.class);
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
     @Test
     public void update_작성자() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(4);
+        QuestionDto newQuestionDto = createQuestionDto(6);
         String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
@@ -68,7 +77,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void update_다른사람() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(5);
+        QuestionDto newQuestionDto = createQuestionDto(7);
         String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
@@ -80,7 +89,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void delete_작성자() {
-        QuestionDto newQuestionDto = createQuestionDto(6);
+        QuestionDto newQuestionDto = createQuestionDto(8);
         String location = createResource(newQuestionDto);
 
         basicAuthTemplate().delete(location);
@@ -90,17 +99,23 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void delete_다른사람_및_게스트() {
-        QuestionDto newQuestionDto = createQuestionDto(7);
+    public void delete_다른사람() {
+        QuestionDto newQuestionDto = createQuestionDto(9);
         String location = createResource(newQuestionDto);
 
         basicAuthTemplate(otherUser).delete(location);
 
         QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
         assertNotNull(dbQuestion);
+    }
+
+    @Test
+    public void delete_게스트() {
+        QuestionDto newQuestionDto = createQuestionDto(10);
+        String location = createResource(newQuestionDto);
 
         template().delete(location);
-        dbQuestion = getResource(location, template(), QuestionDto.class);
+        QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
         assertNotNull(dbQuestion);
     }
 
