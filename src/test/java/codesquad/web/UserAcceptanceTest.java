@@ -48,6 +48,13 @@ public class UserAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    public void show() {
+        long id = 1;
+
+        ResponseEntity<String> response = template().getForEntity(String.format("/users/%d" + id), String.class);
+    }
+
+    @Test
     public void list() throws Exception {
         ResponseEntity<String> response = template().getForEntity("/users", String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
@@ -79,7 +86,7 @@ public class UserAcceptanceTest extends AcceptanceTest {
 
     private ResponseEntity<String> update(TestRestTemplate template) throws Exception {
         HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
-                .addParameter("_method", "put")
+                .setRequestMethod("put")
                 .addParameter("password", "password2")
                 .addParameter("name", "자바지기2")
                 .addParameter("email", "javajigi@slipp.net")

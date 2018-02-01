@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,18 +32,15 @@ public class QnaAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void createForm_no_login() {
-        ResponseEntity<String> response = template().getForEntity("/questions/form", String.class);
+        ResponseEntity<String> response = getForEntity(template(), "/questions/form");
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
     public void createForm_login() {
-        ResponseEntity<String> response = basicAuthTemplate().getForEntity("/questions/form", String.class);
+        ResponseEntity<String> response = getForEntity(basicAuthTemplate(), "/questions/form");
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         logger.debug("body: {}", response.getBody());
-
-        // path 가져올때 NullPointException 발생.. 왜???
-//        assertThat(response.getHeaders().getLocation().getPath(), is("/questions/form"));
     }
 
     @Test
@@ -75,7 +73,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         long id = 1;
         Question question = qnaService.findById(id);
 
-        ResponseEntity<String> response = template().getForEntity(String.format("/questions/%d", id), String.class);
+        ResponseEntity<String> response = getForEntity(template(), String.format("/questions/%d", id));
 
         assertThat(response.getStatusCode(), is(HttpStatus.OK));
         assertTrue(response.getBody().contains(question.getTitle()));
@@ -83,10 +81,11 @@ public class QnaAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void show_list() {
-        Question question = qnaService.findById(1);
-        ResponseEntity<String> response = template().getForEntity("/", String.class);
+        Question question = qnaService.findById(2);
+        ResponseEntity<String> response = getForEntity(template(), "/");
 
-        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        logger.debug("body : {}", response.getBody());
         assertTrue(response.getBody().contains(question.getTitle()));
     }
 
@@ -94,7 +93,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
     public void update_form_no_login() {
         long questionId = 1;
 
-        ResponseEntity<String> response = template().getForEntity(String.format("/questions/%d/form", questionId), String.class);
+        ResponseEntity<String> response = getForEntity(template(), String.format("/questions/%d/form", questionId));
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
@@ -103,11 +102,10 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         long questionId = 1;
         Question question = qnaService.findById(questionId);
 
-        ResponseEntity<String> reponse = basicAuthTemplate()
-                .getForEntity(String.format("/questions/%d/form", questionId), String.class);
+        ResponseEntity<String> response = getForEntity(basicAuthTemplate(), String.format("/questions/%d/form", questionId));
 
-        assertThat(reponse.getStatusCode(), is(HttpStatus.OK));
-        assertThat(reponse.getBody().contains(question.getContents()), is(true));
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        assertThat(response.getBody().contains(question.getContents()), is(true));
 
     }
 
@@ -118,10 +116,9 @@ public class QnaAcceptanceTest extends AcceptanceTest {
 
         User user = userService.findOne(userId);
 
-        ResponseEntity<String> reponse = basicAuthTemplate(user)
-                .getForEntity(String.format("/questions/%d/form", questionId), String.class);
+        ResponseEntity<String> response = getForEntity(basicAuthTemplate(user), String.format("/questions/%d/form", questionId));
 
-        assertThat(reponse.getStatusCode(), is(HttpStatus.FORBIDDEN));
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
@@ -133,7 +130,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         String contents = "test contents";
 
         HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
-                .addParameter("_method", "put")
+                .setRequestMethod("put")
                 .addParameter("title", title)
                 .addParameter("contents", contents)
                 .build();
@@ -156,7 +153,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         String contents = "test contents";
 
         HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
-                .addParameter("_method", "put")
+                .setRequestMethod("put")
                 .addParameter("title", title)
                 .addParameter("contents", contents)
                 .build();
@@ -176,7 +173,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         String contents = "test contents";
 
         HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
-                .addParameter("_method", "put")
+                .setRequestMethod("put")
                 .addParameter("title", title)
                 .addParameter("contents", contents)
                 .build();
@@ -185,5 +182,50 @@ public class QnaAcceptanceTest extends AcceptanceTest {
                 .postForEntity(String.format("/questions/%d", questionId), request, String.class);
 
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void delete_owner_login() {
+        long id = 1;
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .setRequestMethod("delete")
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate()
+                .postForEntity(String.format("/questions/%d", id), request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertTrue(qnaService.findById(id).isDeleted());
+        assertThat(response.getHeaders().getLocation().getPath(), is("/"));
+    }
+
+    @Test
+    public void delete_not_owner_login() {
+        long id = 2;
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .setRequestMethod("delete")
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate()
+                .postForEntity(String.format("/questions/%d", id), request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    @Test
+    public void delete_not_login() {
+        long id = 2;
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .setRequestMethod("delete")
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate()
+                .postForEntity(String.format("/questions/%d", id), request, String.class);
+
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+    }
+
+    private ResponseEntity<String> getForEntity(TestRestTemplate template, String s) {
+        return template.getForEntity(s, String.class);
     }
 }
