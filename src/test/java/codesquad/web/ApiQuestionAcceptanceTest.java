@@ -2,8 +2,10 @@ package codesquad.web;
 
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
+import codesquad.service.UserService;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
@@ -17,7 +19,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Before
     public void setUp() throws Exception {
-        otherUser = new User(10, "boobby", "1234", "boo", "boo@boo.com");
+        otherUser = findByUserId("sanjigi");
     }
 
     @Test
@@ -51,6 +53,10 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
         //작성자 로그인 했을 때
         insertedQuestionDto = basicAuthTemplate().getForObject(location, QuestionDto.class);
+        assertEquals(newQuestionDto, insertedQuestionDto);
+
+        //다른사람 로그인 했을 때
+        insertedQuestionDto = basicAuthTemplate(otherUser).getForObject(location, QuestionDto.class);
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
