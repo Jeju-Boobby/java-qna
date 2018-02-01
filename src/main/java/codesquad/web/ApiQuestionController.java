@@ -28,14 +28,13 @@ public class ApiQuestionController {
         Question savedQuestion = qnaService.create(loginUser, questionDto.toQuestion());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api/questions/" + savedQuestion.getId()));
+        headers.setLocation(URI.create("/api" + savedQuestion.generateUrl()));
         return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
     }
 
     @GetMapping("{id}")
     public QuestionDto show(@PathVariable long id) {
         Question question = qnaService.findById(id);
-
         return question.toQuestionDto();
     }
 

@@ -11,9 +11,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import codesquad.UnAuthorizedException;
 import codesquad.dto.UserDto;
 import support.domain.AbstractEntity;
+import support.domain.UrlGeneratable;
 
 @Entity
-public class User extends AbstractEntity {
+public class User extends AbstractEntity implements UrlGeneratable {
     public static final GuestUser GUEST_USER = new GuestUser();
 
     @Size(min = 3, max = 20)
@@ -88,12 +89,17 @@ public class User extends AbstractEntity {
     public UserDto toUserDto() {
         return new UserDto(this.userId, this.password, this.name, this.email);
     }
-    
+
     @JsonIgnore
     public boolean isGuestUser() {
         return false;
     }
-    
+
+    @Override
+    public String generateUrl() {
+        return String.format("/users/%d", super.getId());
+    }
+
     private static class GuestUser extends User {
         @Override
         public boolean isGuestUser() {

@@ -4,7 +4,6 @@ import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
@@ -13,18 +12,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
-    private final String DEFAULT_REQUEST_URL = "/api/questions";
     private User otherUser;
 
     @Before
     public void setUp() throws Exception {
         otherUser = findByUserId("sanjigi");
+        super.setDefaultRequestUrl("/api/questions");
     }
 
     @Test
     public void create_login() throws Exception {
         QuestionDto newQuestionDto = createQuestionDto(1);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
         assertEquals(newQuestionDto, insertedQuestionDto);
@@ -33,14 +32,14 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void create_not_login() throws Exception {
         QuestionDto newQuestionDto = createQuestionDto(2);
-        ResponseEntity<String> response = template().postForEntity(DEFAULT_REQUEST_URL, newQuestionDto, String.class);
+        ResponseEntity<String> response = template().postForEntity(super.getDefaultRequestUrl(), newQuestionDto, String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
     public void show_모든사람() {
         QuestionDto newQuestionDto = createQuestionDto(3);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         //로그인 안했을 때
         QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
@@ -55,11 +54,10 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
-
     @Test
     public void update_작성자() throws Exception {
         QuestionDto newQuestionDto = createQuestionDto(4);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
         basicAuthTemplate().put(location, updateQuestion);
@@ -71,7 +69,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void update_다른사람() throws Exception {
         QuestionDto newQuestionDto = createQuestionDto(5);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
         basicAuthTemplate(otherUser).put(location, updateQuestion);
@@ -83,7 +81,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void delete_작성자() {
         QuestionDto newQuestionDto = createQuestionDto(6);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         basicAuthTemplate().delete(location);
 
@@ -94,7 +92,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     @Test
     public void delete_다른사람_및_게스트() {
         QuestionDto newQuestionDto = createQuestionDto(7);
-        String location = createResource(newQuestionDto, DEFAULT_REQUEST_URL);
+        String location = createResource(newQuestionDto);
 
         basicAuthTemplate(otherUser).delete(location);
 
