@@ -1,5 +1,6 @@
 package codesquad.web;
 
+import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
 import codesquad.service.UserService;
@@ -11,8 +12,7 @@ import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     private User otherUser;
@@ -60,34 +60,63 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
-//    @Test
-//    public void update() throws Exception {
-//        QuestionDto newUser = createQuestionDto("testuser3");
-//        ResponseEntity<String> response = template().postForEntity("/api/users", newUser, String.class);
-//        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
-//        String location = response.getHeaders().getLocation().getPath();
-//
-//        User loginUser = findByUserId(newUser.getUserId());
-//        UserDto updateUser = new UserDto(newUser.getUserId(), "password", "name2", "javajigi@slipp.net2");
-//        basicAuthTemplate(loginUser).put(location, updateUser);
-//
-//        UserDto dbUser = basicAuthTemplate(findByUserId(newUser.getUserId())).getForObject(location, UserDto.class);
-//        assertThat(dbUser, is(updateUser));
-//    }
-//
-//    @Test
-//    public void update_다른_사람() throws Exception {
-//        QuestionDto newUser = createQuestionDto("testuser4");
-//        ResponseEntity<String> response = template().postForEntity("/api/users", newUser, String.class);
-//        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
-//        String location = response.getHeaders().getLocation().getPath();
-//
-//        UserDto updateUser = new UserDto(newUser.getUserId(), "password", "name2", "javajigi@slipp.net2");
-//        basicAuthTemplate(defaultUser()).put(location, updateUser);
-//
-//        UserDto dbUser = basicAuthTemplate(findByUserId(newUser.getUserId())).getForObject(location, UserDto.class);
-//        assertThat(dbUser, is(newUser));
-//    }
+    @Test
+    public void update_작성자() throws Exception {
+        QuestionDto newQuestionDto = createQuestionDto(4);
+        ResponseEntity<String> response = basicAuthTemplate().postForEntity("/api/questions", newQuestionDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        String location = response.getHeaders().getLocation().getPath();
+
+        QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
+        basicAuthTemplate().put(location, updateQuestion);
+
+        QuestionDto dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertEquals(dbQuestion, updateQuestion);
+    }
+
+    @Test
+    public void update_다른사람() throws Exception {
+        QuestionDto newQuestionDto = createQuestionDto(5);
+        ResponseEntity<String> response = basicAuthTemplate().postForEntity("/api/questions", newQuestionDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        String location = response.getHeaders().getLocation().getPath();
+
+        QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
+        basicAuthTemplate(otherUser).put(location, updateQuestion);
+
+        QuestionDto dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertEquals(dbQuestion, newQuestionDto);
+    }
+
+    @Test
+    public void delete_작성자() {
+        QuestionDto newQuestionDto = createQuestionDto(6);
+        ResponseEntity<String> response = basicAuthTemplate().postForEntity("/api/questions", newQuestionDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        String location = response.getHeaders().getLocation().getPath();
+
+        basicAuthTemplate().delete(location);
+
+        QuestionDto dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertNull(dbQuestion);
+    }
+
+    @Test
+    public void delete_다른사람_및_게스트() {
+        QuestionDto newQuestionDto = createQuestionDto(7);
+        ResponseEntity<String> response = basicAuthTemplate().postForEntity("/api/questions", newQuestionDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        String location = response.getHeaders().getLocation().getPath();
+
+        basicAuthTemplate(otherUser).delete(location);
+
+        QuestionDto dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertNotNull(dbQuestion);
+
+        template().delete(location);
+        dbQuestion = template().getForObject(location, QuestionDto.class);
+        assertNotNull(dbQuestion);
+    }
 
     private QuestionDto createQuestionDto(long questionId) {
         return new QuestionDto(questionId, "test title", "test contents");
