@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.validation.constraints.Size;
 
+import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
 import org.hibernate.annotations.Where;
 
@@ -80,11 +81,15 @@ public class Question extends AbstractEntity {
         return deleted;
     }
 
-    public void delete(User loginUser) {
+    public void delete(User loginUser) throws CannotDeleteException {
         if (!isOwner(loginUser)) {
             throw new UnAuthorizedException("작성자만 삭제할 수 있습니다.");
         }
-        answers.forEach(answer -> answer.delete(loginUser));
+        try {
+            answers.forEach(answer -> answer.delete(loginUser));
+        } catch (UnAuthorizedException e) {
+            throw new CannotDeleteException("삭제할 수 없는 답글이 포함되어 질문을 삭제할 수 없습니다.");
+        }
         deleted = true;
     }
 

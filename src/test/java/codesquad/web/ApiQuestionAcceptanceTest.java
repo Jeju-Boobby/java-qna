@@ -164,10 +164,10 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
 
         QuestionDto dbQuestion = getResource(questionLocation, template(), QuestionDto.class);
-        assertNull(dbQuestion);
+        assertNotNull(dbQuestion);
 
         AnswerDto answerDto = getResource(savedAnswer.generateApiUrl(), basicAuthTemplate(defaultUser()), AnswerDto.class);
-        assertNull(answerDto);
+        assertNotNull(answerDto);
     }
 
     private QuestionDto createQuestionDto() {
