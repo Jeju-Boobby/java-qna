@@ -1,9 +1,13 @@
 package codesquad.web;
 
+import codesquad.domain.Answer;
 import codesquad.domain.User;
+import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
+import codesquad.service.QnaService;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,9 @@ import static org.junit.Assert.*;
 
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     private User otherUser;
+
+    @Autowired
+    private QnaService qnaService;
 
     @Before
     public void setUp() throws Exception {
@@ -91,14 +98,10 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
-    public void delete_작성자() {
-        QuestionDto newQuestionDto = createQuestionDto();
-        String location = createResource(newQuestionDto);
+    public void delete_없는_질문() {
+        ResponseEntity<String> response = getResponseWithDeleteRequest(defaultUser(), "/api/questions/-30");
 
-        basicAuthTemplate().delete(location);
-
-        QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
-        assertNull(dbQuestion);
+        assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -106,39 +109,60 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
-        basicAuthTemplate(otherUser).delete(location);
+        ResponseEntity<String> response = getResponseWithDeleteRequest(otherUser, location);
+        assertEquals(response.getStatusCode(), HttpStatus.FORBIDDEN);
 
         QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
         assertNotNull(dbQuestion);
     }
 
     @Test
-    public void delete_게스트() {
+    public void delete_작성자_답글없음() {
         QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
-        template().delete(location);
+        ResponseEntity<String> response = getResponseWithDeleteRequest(defaultUser(), location);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+
         QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
-        assertNotNull(dbQuestion);
+        assertNull(dbQuestion);
     }
 
     @Test
-    public void delete_없는_질문() {
-        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
-                .setRequestMethod("delete")
-                .build();
+    public void delete_작성자_답글도_작성자() {
+        QuestionDto newQuestionDto = createQuestionDto();
+        String questionLocation = createResource(newQuestionDto);
 
-        ResponseEntity<String> response = basicAuthTemplate()
-                .postForEntity(
-                        String.format("/api/questions/-30"),
-                        request,
-                        String.class
-                );
+        Answer dbAnswer = qnaService.createAnswer(
+                defaultUser(),
+                Integer.parseInt(questionLocation.substring(15)),
+                new AnswerDto("test Contents").toAnswer()
+        );
 
-        assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
+        ResponseEntity<String> response = getResponseWithDeleteRequest(defaultUser(), questionLocation);
+        assertEquals(response.getStatusCode(), HttpStatus.OK);
+
+        QuestionDto dbQuestion = getResource(questionLocation, template(), QuestionDto.class);
+        assertNull(dbQuestion);
+
+        dbAnswer = qnaService.findAnswerById(dbAnswer.getId());
+        assertNull(dbAnswer);
     }
 
     private QuestionDto createQuestionDto() {
         return new QuestionDto("test title", "test contents");
+    }
+
+    private ResponseEntity<String> getResponseWithDeleteRequest(User loginUser, String location) {
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .setRequestMethod("delete")
+                .build();
+
+        return basicAuthTemplate(loginUser)
+                .postForEntity(
+                        String.format(location),
+                        request,
+                        String.class
+                );
     }
 }

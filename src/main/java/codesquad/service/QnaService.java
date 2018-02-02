@@ -79,8 +79,4 @@ public class QnaService {
     public List<Question> findAll(Pageable pageable) {
         return questionRepository.findAll(pageable).getContent();
     }
-
-    public Answer addAnswer(User loginUser, long questionId, String contents) {
-        return null;
-    }
 }
