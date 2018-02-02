@@ -14,7 +14,7 @@ import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
 
 @Entity
-public class User extends AbstractEntity implements UrlGeneratable {
+public class User extends AbstractEntity {
     public static final GuestUser GUEST_USER = new GuestUser();
 
     @Size(min = 3, max = 20)
@@ -95,11 +95,6 @@ public class User extends AbstractEntity implements UrlGeneratable {
         return false;
     }
 
-    @Override
-    public String generateUrl() {
-        return String.format("/users/%d", super.getId());
-    }
-
     private static class GuestUser extends User {
         @Override
         public boolean isGuestUser() {
@@ -110,5 +105,10 @@ public class User extends AbstractEntity implements UrlGeneratable {
     @Override
     public String toString() {
         return "User [userId=" + userId + ", password=" + password + ", name=" + name + ", email=" + email + "]";
+    }
+
+    @Override
+    public String generateUrl() {
+        return String.format("/users/%d", getId());
     }
 }

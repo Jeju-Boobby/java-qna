@@ -26,7 +26,7 @@ public class ApiUserController {
         User savedUser = userService.add(user);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api" + savedUser.generateUrl()));
+        headers.setLocation(URI.create(savedUser.generateApiUrl()));
         return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
     }
     

@@ -28,7 +28,7 @@ public class ApiQuestionController {
         Question savedQuestion = qnaService.create(loginUser, questionDto.toQuestion());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/api" + savedQuestion.generateUrl()));
+        headers.setLocation(URI.create(savedQuestion.generateApiUrl()));
         return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
     }
 
