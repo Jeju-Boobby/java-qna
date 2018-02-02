@@ -133,7 +133,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         QuestionDto newQuestionDto = createQuestionDto();
         String questionLocation = createResource(newQuestionDto);
 
-        Answer dbAnswer = qnaService.createAnswer(
+        Answer savedAnswer = qnaService.createAnswer(
                 defaultUser(),
                 Integer.parseInt(questionLocation.substring(15)),
                 new AnswerDto("test Contents").toAnswer()
@@ -145,8 +145,8 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         QuestionDto dbQuestion = getResource(questionLocation, template(), QuestionDto.class);
         assertNull(dbQuestion);
 
-        dbAnswer = qnaService.findAnswerById(dbAnswer.getId());
-        assertNull(dbAnswer);
+        AnswerDto answerDto = getResource(savedAnswer.generateApiUrl(), basicAuthTemplate(defaultUser()), AnswerDto.class);
+        assertNull(answerDto);
     }
 
     private QuestionDto createQuestionDto() {

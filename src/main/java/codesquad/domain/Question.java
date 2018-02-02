@@ -84,6 +84,7 @@ public class Question extends AbstractEntity {
         if (!isOwner(loginUser)) {
             throw new UnAuthorizedException("작성자만 삭제할 수 있습니다.");
         }
+        answers.forEach(answer -> answer.delete(loginUser));
         deleted = true;
     }
 
