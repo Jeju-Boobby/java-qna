@@ -149,6 +149,27 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertNull(answerDto);
     }
 
+    @Test
+    public void delete_작성자_답글은_다른사람() {
+        QuestionDto newQuestionDto = createQuestionDto();
+        String questionLocation = createResource(newQuestionDto);
+
+        Answer savedAnswer = qnaService.createAnswer(
+                otherUser,
+                Integer.parseInt(questionLocation.substring(15)),
+                new AnswerDto("test Contents").toAnswer()
+        );
+
+        ResponseEntity<String> response = getResponseWithDeleteRequest(defaultUser(), questionLocation);
+        assertEquals(response.getStatusCode(), HttpStatus.NOT_ACCEPTABLE);
+
+        QuestionDto dbQuestion = getResource(questionLocation, template(), QuestionDto.class);
+        assertNull(dbQuestion);
+
+        AnswerDto answerDto = getResource(savedAnswer.generateApiUrl(), basicAuthTemplate(defaultUser()), AnswerDto.class);
+        assertNull(answerDto);
+    }
+
     private QuestionDto createQuestionDto() {
         return new QuestionDto("test title", "test contents");
     }
