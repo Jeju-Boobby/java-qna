@@ -88,62 +88,6 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
-//    @Test
-//    public void update_작성자() throws Exception {
-//        AnswerDto newQuestionDto = createAnswerDto(6);
-//        String location = createResource(newQuestionDto);
-//
-//        AnswerDto updateQuestion = new AnswerDto(newQuestionDto.getId(), "update title", "update contents");
-//        basicAuthTemplate().put(location, updateQuestion);
-//
-//        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
-//        assertEquals(dbQuestion, updateQuestion);
-//    }
-//
-//    @Test
-//    public void update_다른사람() throws Exception {
-//        AnswerDto newQuestionDto = createAnswerDto(7);
-//        String location = createResource(newQuestionDto);
-//
-//        AnswerDto updateQuestion = new AnswerDto(newQuestionDto.getId(), "update title", "update contents");
-//        basicAuthTemplate(otherUser).put(location, updateQuestion);
-//
-//        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
-//        assertEquals(dbQuestion, newQuestionDto);
-//    }
-//
-//    @Test
-//    public void delete_작성자() {
-//        AnswerDto newQuestionDto = createAnswerDto(8);
-//        String location = createResource(newQuestionDto);
-//
-//        basicAuthTemplate().delete(location);
-//
-//        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
-//        assertNull(dbQuestion);
-//    }
-//
-//    @Test
-//    public void delete_다른사람() {
-//        AnswerDto newQuestionDto = createAnswerDto(9);
-//        String location = createResource(newQuestionDto);
-//
-//        basicAuthTemplate(otherUser).delete(location);
-//
-//        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
-//        assertNotNull(dbQuestion);
-//    }
-//
-//    @Test
-//    public void delete_게스트() {
-//        AnswerDto newQuestionDto = createAnswerDto(10);
-//        String location = createResource(newQuestionDto);
-//
-//        template().delete(location);
-//        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
-//        assertNotNull(dbQuestion);
-//    }
-
     private AnswerDto createAnswerDto() {
         return new AnswerDto("test contents");
     }
