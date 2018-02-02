@@ -17,8 +17,12 @@ public class AnswerDto {
 
     }
 
-    public AnswerDto(long answerId, String contents) {
-        this.id = answerId;
+    public AnswerDto(String contents) {
+        this.contents = contents;
+    }
+
+    public AnswerDto(long id, String contents) {
+        this.id = id;
         this.contents = contents;
     }
 
@@ -47,12 +51,19 @@ public class AnswerDto {
         if (this == o) return true;
         if (!(o instanceof AnswerDto)) return false;
         AnswerDto answerDto = (AnswerDto) o;
-        return id == answerDto.id &&
-                Objects.equals(contents, answerDto.contents);
+        return Objects.equals(contents, answerDto.contents);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, contents);
+        return Objects.hash(contents);
+    }
+
+    @Override
+    public String toString() {
+        return "AnswerDto[" +
+                "id=" + id +
+                ", contents='" + contents + '\'' +
+                ']';
     }
 }

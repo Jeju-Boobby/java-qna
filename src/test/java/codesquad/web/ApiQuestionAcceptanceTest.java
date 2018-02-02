@@ -22,7 +22,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create_login() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(1);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
@@ -31,14 +31,14 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void create_not_login() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(2);
+        QuestionDto newQuestionDto = createQuestionDto();
         ResponseEntity<String> response = template().postForEntity(super.getDefaultRequestUrl(), newQuestionDto, String.class);
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
     public void show_게스트() {
-        QuestionDto newQuestionDto = createQuestionDto(3);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
@@ -47,7 +47,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void show_작성자() {
-        QuestionDto newQuestionDto = createQuestionDto(4);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto insertedQuestionDto = getResource(location, basicAuthTemplate(defaultUser()), QuestionDto.class);
@@ -56,7 +56,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void show_다른사람() {
-        QuestionDto newQuestionDto = createQuestionDto(5);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto insertedQuestionDto = getResource(location, basicAuthTemplate(otherUser), QuestionDto.class);
@@ -65,7 +65,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void update_작성자() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(6);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
@@ -77,7 +77,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void update_다른사람() throws Exception {
-        QuestionDto newQuestionDto = createQuestionDto(7);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         QuestionDto updateQuestion = new QuestionDto(newQuestionDto.getId(), "update title", "update contents");
@@ -89,7 +89,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void delete_작성자() {
-        QuestionDto newQuestionDto = createQuestionDto(8);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         basicAuthTemplate().delete(location);
@@ -100,7 +100,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void delete_다른사람() {
-        QuestionDto newQuestionDto = createQuestionDto(9);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         basicAuthTemplate(otherUser).delete(location);
@@ -111,7 +111,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void delete_게스트() {
-        QuestionDto newQuestionDto = createQuestionDto(10);
+        QuestionDto newQuestionDto = createQuestionDto();
         String location = createResource(newQuestionDto);
 
         template().delete(location);
@@ -119,7 +119,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         assertNotNull(dbQuestion);
     }
 
-    private QuestionDto createQuestionDto(long questionId) {
-        return new QuestionDto(questionId, "test title", "test contents");
+    private QuestionDto createQuestionDto() {
+        return new QuestionDto("test title", "test contents");
     }
 }
