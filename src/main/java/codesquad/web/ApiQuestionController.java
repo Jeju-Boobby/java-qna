@@ -3,17 +3,14 @@ package codesquad.web;
 import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
-import codesquad.dto.UserDto;
 import codesquad.security.LoginUser;
 import codesquad.service.QnaService;
-import codesquad.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.net.URI;
 
@@ -25,7 +22,7 @@ public class ApiQuestionController {
 
     @PostMapping("")
     public ResponseEntity<Void> create(@LoginUser User loginUser, @Valid @RequestBody QuestionDto questionDto) {
-        Question savedQuestion = qnaService.create(loginUser, questionDto.toQuestion());
+        Question savedQuestion = qnaService.createQuestion(loginUser, questionDto.toQuestion());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(savedQuestion.generateApiUrl()));
@@ -34,7 +31,7 @@ public class ApiQuestionController {
 
     @GetMapping("{id}")
     public QuestionDto show(@PathVariable long id) {
-        Question question = qnaService.findById(id);
+        Question question = qnaService.findQuestionById(id);
         return question.toQuestionDto();
     }
 

@@ -1,6 +1,8 @@
 package codesquad.service;
 
+import codesquad.UnAuthenticationException;
 import codesquad.domain.*;
+import codesquad.dto.AnswerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +25,22 @@ public class QnaService {
     @Resource(name = "deleteHistoryService")
     private DeleteHistoryService deleteHistoryService;
 
-    public Question create(User loginUser, Question question) {
+    public Question createQuestion(User loginUser, Question question) {
         question.writeBy(loginUser);
         log.debug("question : {}", question);
         return questionRepository.save(question);
     }
 
-    public Question findById(long id) {
+    public Answer createAnswer(User loginUser, long targetId, AnswerDto answerDto) {
+        return answerRepository.save(answerDto.toAnswer(loginUser, questionRepository.findOne(targetId)));
+    }
+
+    public Question findQuestionById(long id) {
         return questionRepository.findOne(id);
+    }
+
+    public Answer findAnswerById(long id) {
+        return answerRepository.findOne(id);
     }
 
     @Transactional

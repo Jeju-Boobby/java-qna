@@ -1,12 +1,14 @@
 package codesquad.dto;
 
+import codesquad.domain.Answer;
 import codesquad.domain.Question;
+import codesquad.domain.User;
 
 import javax.validation.constraints.Size;
+import java.util.Objects;
 
 public class AnswerDto {
     private long id;
-    private Question question;
 
     @Size(min = 5)
     private String contents;
@@ -15,9 +17,8 @@ public class AnswerDto {
 
     }
 
-    public AnswerDto(long answerId, Question question, String contents) {
+    public AnswerDto(long answerId, String contents) {
         this.id = answerId;
-        this. question = question;
         this.contents = contents;
     }
 
@@ -29,19 +30,29 @@ public class AnswerDto {
         this.id = id;
     }
 
-    public Question getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
-    }
-
     public String getContents() {
         return contents;
     }
 
     public void setContents(String contents) {
         this.contents = contents;
+    }
+
+    public Answer toAnswer(User loginUser, Question target) {
+        return new Answer(id, loginUser, target, contents);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AnswerDto)) return false;
+        AnswerDto answerDto = (AnswerDto) o;
+        return id == answerDto.id &&
+                Objects.equals(contents, answerDto.contents);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, contents);
     }
 }

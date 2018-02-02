@@ -7,8 +7,6 @@ import codesquad.service.QnaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -27,16 +25,16 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
         long questionId = 1;
 
         super.setDefaultRequestUrl(String.format("/api/questions/%d/answers", questionId));
-        question = qnaService.findById(questionId);
+        question = qnaService.findQuestionById(questionId);
     }
 
     @Test
     public void create_있는질문_로그인된상황() throws Exception {
-        AnswerDto newAnswer = createAnswerDto(1, question);
+        AnswerDto newAnswer = createAnswerDto(1);
         String location = createResource(newAnswer);
 
-        QuestionDto insertedQuestionDto = getResource(location, template(), QuestionDto.class);
-        assertEquals(newAnswer, insertedQuestionDto);
+        AnswerDto insertedAnswerDto = getResource(location, template(), AnswerDto.class);
+        assertEquals(newAnswer, insertedAnswerDto);
     }
 //
 //    @Test
@@ -129,7 +127,7 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
 //        assertNotNull(dbQuestion);
 //    }
 
-    private AnswerDto createAnswerDto(long answerId, Question question) {
-        return new AnswerDto(answerId, question, "test contents");
+    private AnswerDto createAnswerDto(long answerId) {
+        return new AnswerDto(answerId, "test contents");
     }
 }

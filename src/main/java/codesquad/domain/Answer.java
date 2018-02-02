@@ -7,11 +7,12 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.Size;
 
+import codesquad.dto.AnswerDto;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
 
 @Entity
-public class Answer extends AbstractEntity implements UrlGeneratable {
+public class Answer extends AbstractEntity {
     @ManyToOne
     @JoinColumn(foreignKey = @ForeignKey(name = "fk_answer_writer"))
     private User writer;
@@ -74,5 +75,13 @@ public class Answer extends AbstractEntity implements UrlGeneratable {
     @Override
     public String toString() {
         return "Answer [id=" + getId() + ", writer=" + writer + ", contents=" + contents + "]";
+    }
+
+    public void setWriter(User writer) {
+        this.writer = writer;
+    }
+
+    public AnswerDto toAnswerDto() {
+        return new AnswerDto(this.getId(), this.contents);
     }
 }
