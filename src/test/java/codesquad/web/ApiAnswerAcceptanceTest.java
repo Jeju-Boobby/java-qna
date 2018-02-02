@@ -7,6 +7,8 @@ import codesquad.service.QnaService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -35,6 +37,13 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
 
         AnswerDto insertedAnswerDto = getResource(location, template(), AnswerDto.class);
         assertEquals(newAnswer, insertedAnswerDto);
+    }
+
+    @Test
+    public void create_있는질문_로그인_안_되어있는상황() {
+        AnswerDto newAnswerDto = createAnswerDto(2);
+        ResponseEntity<String> response = template().postForEntity(super.getDefaultRequestUrl(), newAnswerDto, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 //
 //    @Test
