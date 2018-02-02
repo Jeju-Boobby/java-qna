@@ -88,6 +88,38 @@ public class ApiAnswerAcceptanceTest extends AcceptanceTest {
         assertEquals(newQuestionDto, insertedQuestionDto);
     }
 
+    @Test
+    public void delete_작성자() {
+        AnswerDto newAnswerDto = createAnswerDto();
+        String location = createResource(newAnswerDto);
+
+        basicAuthTemplate().delete(location);
+
+        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
+        assertNull(dbQuestion);
+    }
+
+    @Test
+    public void delete_다른사람() {
+        AnswerDto newQuestionDto = createAnswerDto();
+        String location = createResource(newQuestionDto);
+
+        basicAuthTemplate(otherUser).delete(location);
+
+        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
+        assertNotNull(dbQuestion);
+    }
+
+    @Test
+    public void delete_게스트() {
+        AnswerDto newQuestionDto = createAnswerDto();
+        String location = createResource(newQuestionDto);
+
+        template().delete(location);
+        AnswerDto dbQuestion = getResource(location, template(), AnswerDto.class);
+        assertNotNull(dbQuestion);
+    }
+
     private AnswerDto createAnswerDto() {
         return new AnswerDto("test contents");
     }

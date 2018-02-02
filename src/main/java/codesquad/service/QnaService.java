@@ -1,8 +1,6 @@
 package codesquad.service;
 
-import codesquad.UnAuthenticationException;
 import codesquad.domain.*;
-import codesquad.dto.AnswerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +29,12 @@ public class QnaService {
         return questionRepository.save(question);
     }
 
-    public Answer createAnswer(User loginUser, long targetId, AnswerDto answerDto) {
-        return answerRepository.save(answerDto.toAnswer(loginUser, questionRepository.findOne(targetId)));
+    @Transactional
+    public Answer createAnswer(User loginUser, long targetId, Answer answer) {
+        answer.writeBy(loginUser);
+        Question target = questionRepository.findOne(targetId);
+        target.addAnswer(answer);
+        return answer;
     }
 
     public Question findQuestionById(long id) {
@@ -57,6 +59,12 @@ public class QnaService {
         question.delete(loginUser);
     }
 
+    @Transactional
+    public void deleteAnswer(User loginUser, long id) {
+        Answer answer = answerRepository.findOne(id);
+        answer.delete(loginUser);
+    }
+
     public Iterable<Question> findAll() {
         return questionRepository.findByDeleted(false);
     }
@@ -66,11 +74,6 @@ public class QnaService {
     }
 
     public Answer addAnswer(User loginUser, long questionId, String contents) {
-        return null;
-    }
-
-    public Answer deleteAnswer(User loginUser, long id) {
-        // TODO 답변 삭제 기능 구현 
         return null;
     }
 }

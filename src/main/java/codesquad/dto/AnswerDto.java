@@ -42,8 +42,8 @@ public class AnswerDto {
         this.contents = contents;
     }
 
-    public Answer toAnswer(User loginUser, Question target) {
-        return new Answer(id, loginUser, target, contents);
+    public Answer toAnswer() {
+        return new Answer(id, contents);
     }
 
     @Override

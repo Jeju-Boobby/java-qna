@@ -24,26 +24,21 @@ public class ApiAnswerController {
 
     @PostMapping("")
     public ResponseEntity<Void> create(@LoginUser User loginUser, @PathVariable long questionId, @Valid @RequestBody AnswerDto answerDto) throws UnAuthenticationException {
-        Answer savedAnswer = qnaService.createAnswer(loginUser, questionId, answerDto);
+        Answer savedAnswer = qnaService.createAnswer(loginUser, questionId, answerDto.toAnswer());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(savedAnswer.generateApiUrl()));
         return new ResponseEntity<Void>(headers, HttpStatus.CREATED);
     }
 
-    @GetMapping("{id}")
-    public AnswerDto show(@PathVariable long id) {
-        Answer answer = qnaService.findAnswerById(id);
+    @GetMapping("{answerId}")
+    public AnswerDto show(@PathVariable long answerId) {
+        Answer answer = qnaService.findAnswerById(answerId);
         return answer.toAnswerDto();
     }
-//
-//    @PutMapping("{id}")
-//    public void update(@LoginUser User loginUser, @PathVariable long id, @Valid @RequestBody QuestionDto updatedQuestion) {
-//        qnaService.update(loginUser, id, updatedQuestion.toQuestion());
-//    }
-//
-//    @DeleteMapping("{id}")
-//    public void delete(@LoginUser User loginUser, @PathVariable long id) {
-//        qnaService.deleteQuestion(loginUser, id);
-//    }
+
+    @DeleteMapping("{answerId}")
+    public void delete(@LoginUser User loginUser, @PathVariable long answerId) {
+        qnaService.deleteAnswer(loginUser, answerId);
+    }
 }

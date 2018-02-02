@@ -7,6 +7,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.Size;
 
+import codesquad.UnAuthorizedException;
 import codesquad.dto.AnswerDto;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
@@ -35,10 +36,8 @@ public class Answer extends AbstractEntity {
         this.contents = contents;
     }
 
-    public Answer(Long id, User writer, Question question, String contents) {
+    public Answer(Long id, String contents) {
         super(id);
-        this.writer = writer;
-        this.question = question;
         this.contents = contents;
         this.deleted = false;
     }
@@ -77,11 +76,22 @@ public class Answer extends AbstractEntity {
         return "Answer [id=" + getId() + ", writer=" + writer + ", contents=" + contents + "]";
     }
 
-    public void setWriter(User writer) {
+    public void writeBy(User writer) {
         this.writer = writer;
     }
 
     public AnswerDto toAnswerDto() {
+        if (isDeleted()) {
+            return null;
+        }
         return new AnswerDto(this.getId(), this.contents);
+    }
+
+    public void delete(User loginUser) {
+        if (!isOwner(loginUser)) {
+            throw new UnAuthorizedException("작성자만 삭제할 수 있습니다.");
+        }
+
+        this.deleted = true;
     }
 }
