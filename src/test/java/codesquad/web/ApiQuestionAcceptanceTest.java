@@ -4,9 +4,12 @@ import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import support.test.AcceptanceTest;
+import support.test.HtmlFormDataBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
@@ -117,6 +120,22 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         template().delete(location);
         QuestionDto dbQuestion = getResource(location, template(), QuestionDto.class);
         assertNotNull(dbQuestion);
+    }
+
+    @Test
+    public void delete_없는_질문() {
+        HttpEntity<MultiValueMap<String, Object>> request = HtmlFormDataBuilder.urlEncodedForm()
+                .setRequestMethod("delete")
+                .build();
+
+        ResponseEntity<String> response = basicAuthTemplate()
+                .postForEntity(
+                        String.format("/api/questions/-30"),
+                        request,
+                        String.class
+                );
+
+        assertEquals(response.getStatusCode(), HttpStatus.BAD_REQUEST);
     }
 
     private QuestionDto createQuestionDto() {

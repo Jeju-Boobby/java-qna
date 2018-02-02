@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service("qnaService")
@@ -56,12 +57,18 @@ public class QnaService {
     @Transactional
     public void deleteQuestion(User loginUser, long questionId) {
         Question question = questionRepository.findOne(questionId);
+        if (question == null) {
+            throw new EntityNotFoundException("해당하는 데이터를 찾기 못하였습니다.");
+        }
         question.delete(loginUser);
     }
 
     @Transactional
     public void deleteAnswer(User loginUser, long id) {
         Answer answer = answerRepository.findOne(id);
+        if (answer == null) {
+            throw new EntityNotFoundException("해당하는 데이터를 찾기 못하였습니다.");
+        }
         answer.delete(loginUser);
     }
 
