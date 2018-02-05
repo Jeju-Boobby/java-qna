@@ -59,18 +59,18 @@ public class QnaService {
     public void deleteQuestion(User loginUser, long questionId) throws CannotDeleteException {
         Question question = questionRepository.findOne(questionId);
         if (question == null) {
-            throw new EntityNotFoundException("해당하는 데이터를 찾기 못하였습니다.");
+            throw new EntityNotFoundException("해당하는 데이터를 찾지 못하였습니다.");
         }
-        question.delete(loginUser);
+        deleteHistoryService.save(question.delete(loginUser));
     }
 
     @Transactional
     public void deleteAnswer(User loginUser, long id) {
         Answer answer = answerRepository.findOne(id);
         if (answer == null) {
-            throw new EntityNotFoundException("해당하는 데이터를 찾기 못하였습니다.");
+            throw new EntityNotFoundException("해당하는 데이터를 찾지 못하였습니다.");
         }
-        answer.delete(loginUser);
+        deleteHistoryService.save(answer.delete(loginUser));
     }
 
     public Iterable<Question> findAll() {

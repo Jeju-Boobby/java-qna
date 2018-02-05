@@ -4,6 +4,7 @@ import codesquad.domain.Answer;
 import codesquad.domain.User;
 import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
+import codesquad.service.DeleteHistoryService;
 import codesquad.service.QnaService;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,9 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Autowired
     private QnaService qnaService;
+
+    @Autowired
+    private DeleteHistoryService deleteHistoryService;
 
     @Before
     public void setUp() throws Exception {

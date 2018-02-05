@@ -1,5 +1,6 @@
 package codesquad.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class Question extends AbstractEntity {
         return deleted;
     }
 
-    public void delete(User loginUser) throws CannotDeleteException {
+    public DeleteHistory delete(User loginUser) throws CannotDeleteException {
         if (!isOwner(loginUser)) {
             throw new UnAuthorizedException("작성자만 삭제할 수 있습니다.");
         }
@@ -91,6 +92,8 @@ public class Question extends AbstractEntity {
             throw new CannotDeleteException("삭제할 수 없는 답글이 포함되어 질문을 삭제할 수 없습니다.");
         }
         deleted = true;
+
+        return new DeleteHistory(ContentType.QUESTION, super.getId(), loginUser, LocalDateTime.now());
     }
 
     public void update(User loginUser, Question newQuestion) {
